@@ -34,9 +34,9 @@ connectDB();
 app.use("/api", apiRouter);
 
 // send back a 404 error for any unknown api request
-app.use((_req, _res, next) => {
-  next(new ApiError(httpStatus.NOT_FOUND, "Not found"));
-});
+// app.use((_req, _res, next) => {
+//   next(new ApiError(httpStatus.NOT_FOUND, "Not found"));
+// });
 
 app.listen(5000, () => {
   console.log(`Server is running on port- ${5000}`.bgWhite.red);
