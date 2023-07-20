@@ -32,6 +32,12 @@ app.use(
 
 connectDB();
 app.use("/api", apiRouter);
+app.get("/", (req, res) => {
+  res.send(
+    `<h1>Site is working. click <a href=${process.env.FRONTEND_URL}>
+            here</a> to visit frontend.`
+  );
+});
 
 // send back a 404 error for any unknown api request
 // app.use((_req, _res, next) => {
