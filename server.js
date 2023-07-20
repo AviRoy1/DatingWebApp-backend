@@ -24,7 +24,7 @@ app.use(mongoSanitize());
 
 app.use(
   cors({
-    origin: "https://dating-web-app-frontend.vercel.app",
+    origin: process.env.frontend,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
