@@ -22,6 +22,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(xss());
 app.use(mongoSanitize());
 
+// console.log(process.env.frontend);
+
 app.use(
   cors({
     origin: process.env.frontend,
@@ -34,7 +36,7 @@ connectDB();
 app.use("/api", apiRouter);
 app.get("/", (req, res) => {
   res.send(
-    `<h1>Site is working. click <a href=${process.env.FRONTEND_URL}>
+    `<h1>Site is working. click <a href=${process.env.frontend}>
             here</a> to visit frontend.`
   );
 });
