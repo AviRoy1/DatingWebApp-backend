@@ -82,12 +82,12 @@ export const updateProfile = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User Not Found" });
     }
-
     const filter = { _id: user._id };
     const updatedata = {
       profilePic: req.body?.profilePic,
-      gender: req.body.gender,
-      age: req.body.age,
+      name: req.body?.name,
+      gender: req.body?.gender,
+      age: req.body?.age,
       bio: req.body?.bio,
       interestIn: req.body?.interestIn,
       location: req.body?.location,
@@ -96,16 +96,16 @@ export const updateProfile = async (req, res) => {
     const updatedUser = await User.findOneAndUpdate(filter, updatedata, {
       new: true,
     });
-    if (req.body?.hobbies.length > 0) {
-      const newArr = req.body.hobbies;
-      // newArr =
-      newArr.forEach((item) => updatedUser.hobbies.push(item));
-    }
+    // if (req.body?.hobbies.length > 0) {
+    //   const newArr = req.body.hobbies;
+    //   // newArr =
+    //   newArr.forEach((item) => updatedUser.hobbies.push(item));
+    // }
 
-    if (req.body?.photos.length > 0 && updatedUser.photos.length < 3) {
-      const newArr = req.body.photos;
-      newArr.forEach((item) => updatedUser.photos.push(item));
-    }
+    // if (req.body?.photos.length > 0 && updatedUser.photos.length < 3) {
+    //   const newArr = req.body.photos;
+    //   newArr.forEach((item) => updatedUser.photos.push(item));
+    // }
 
     await updatedUser.save();
 
