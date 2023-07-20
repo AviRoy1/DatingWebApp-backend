@@ -63,7 +63,7 @@ const updateProfileMiddleware = joi.object().keys({
   photos: joi.array().items(joi.string()),
   relationshipType: joi.string(),
 });
-router.put(
+router.post(
   "/profileupdate",
   verifytoken,
   async (req, res, next) => {

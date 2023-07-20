@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(xss());
 app.use(mongoSanitize());
 
-// console.log(process.env.frontend);
+console.log(process.env.frontend);
 
 app.use(
   cors({
