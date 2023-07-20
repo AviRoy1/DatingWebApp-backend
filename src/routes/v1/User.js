@@ -54,14 +54,15 @@ router.post(
 // Update profile
 const updateProfileMiddleware = joi.object().keys({
   profilePic: joi.string(),
-  gender: joi.string().required(),
-  age: joi.number().required(),
-  interestIn: joi.string().required(),
-  location: joi.string().required(),
+  gender: joi.string(),
+  age: joi.string(),
+  interestIn: joi.string(),
+  location: joi.string(),
   bio: joi.string(),
   hobbies: joi.array().items(joi.string()),
   photos: joi.array().items(joi.string()),
   relationshipType: joi.string(),
+  name: joi.string(),
 });
 router.post(
   "/profileupdate",
