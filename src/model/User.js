@@ -4,7 +4,7 @@ import validator from "validator";
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    require: true,
+    // require: true,
   },
   email: {
     type: String,
@@ -42,16 +42,13 @@ const userSchema = new mongoose.Schema({
   },
   photos: [{ type: String }],
   hobbies: [{ type: String }],
+  relationshipStatus: {
+    type: String,
+    enum: ["Single", "Marid"],
+  },
   relationshipType: {
     type: String,
-    enum: [
-      "Friendship",
-      "Long Term",
-      "Short Term",
-      "Casual",
-      "Don't Know",
-      "Hookups",
-    ],
+    enum: ["Friendship", "Long Term", "Short Term", "Casual", "Hookups"],
   },
   superLikeCount: {
     type: Number,
@@ -65,6 +62,14 @@ const userSchema = new mongoose.Schema({
   isDeactivate: {
     type: Boolean,
     default: false,
+  },
+  subscription: {
+    id: String,
+    status: {
+      type: String,
+      default: "inactive",
+    },
+    plan: { type: String, default: "0" },
   },
   createdAt: {
     type: Date,

@@ -17,7 +17,7 @@ const router = express.Router();
 //  SignUp
 const signUpMiddleware = joi.object().keys({
   name: joi.string().required(),
-  email: joi.string().email().required(),
+  email: joi.string().email().required().trim(),
   password: joi.string().trim().required(),
 });
 router.post(
@@ -62,6 +62,7 @@ const updateProfileMiddleware = joi.object().keys({
   hobbies: joi.array().items(joi.string()),
   photos: joi.array().items(joi.string()),
   relationshipType: joi.string(),
+  relationshipStatus: joi.string(),
   name: joi.string(),
 });
 router.post(
@@ -79,19 +80,7 @@ router.post(
 );
 
 // My profile
-router.get(
-  "/myprofile",
-  verifytoken,
-  async (req, res, next) => {
-    try {
-      req.body = await updateProfileMiddleware.validateAsync(req.body);
-      next();
-    } catch (err) {
-      return res.status(422).json({ message: getErrorMessage(err) });
-    }
-  },
-  myprofile
-);
+router.get("/me", verifytoken, myprofile);
 
 // get all users - admin
 router.get("/admin/alluser", verifytoken, getalluserAdmin);

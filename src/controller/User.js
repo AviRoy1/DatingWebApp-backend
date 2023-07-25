@@ -35,8 +35,12 @@ export const register = async (req, res) => {
       JWTSEC
     );
 
-    const { email, password, ...other } = user._doc;
-    return res.status(200).json({ user: other, accessToken: accessToken });
+    const { password, ...other } = user._doc;
+    return res.status(200).json({
+      user: other,
+      accessToken: accessToken,
+      message: "Registered Successfully",
+    });
   } catch (err) {
     // console.log(err);
     return res.status(400).json({ message: err });
@@ -45,7 +49,6 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    console.log(req.body);
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
@@ -67,8 +70,12 @@ export const login = async (req, res) => {
       JWTSEC
     );
 
-    const { email, password, ...other } = user._doc;
-    return res.status(200).json({ user: other, accessToken: accessToken });
+    const { password, ...other } = user._doc;
+    return res.status(200).json({
+      user: other,
+      accessToken: accessToken,
+      message: `Welcome back, ${user.name}`,
+    });
   } catch (err) {
     console.log(err);
     return res.status(400).json({ message: err });
@@ -82,6 +89,7 @@ export const updateProfile = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User Not Found" });
     }
+    console.log(req.body);
     const filter = { _id: user._id };
     const updatedata = {
       profilePic: req.body?.profilePic,
@@ -90,8 +98,9 @@ export const updateProfile = async (req, res) => {
       age: req.body?.age,
       bio: req.body?.bio,
       interestIn: req.body?.interestIn,
-      location: req.body?.location,
       relationshipType: req.body?.relationshipType,
+      location: req.body?.location,
+      relationshipStatus: req.body?.relationshipStatus,
     };
     const updatedUser = await User.findOneAndUpdate(filter, updatedata, {
       new: true,

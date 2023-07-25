@@ -8,6 +8,7 @@ import cors from "cors";
 import connectDB from "./src/config/DB.js";
 import apiRouter from "./src/routes/index.js";
 import ApiError from "./src/utils/index.js";
+import Razorpay from "razorpay";
 
 dotenv.config();
 const app = express();
@@ -22,11 +23,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(xss());
 app.use(mongoSanitize());
 
-console.log(process.env.frontend);
-
 app.use(
   cors({
-    origin: process.env.frontend,
+    origin: process.env.FRONTEND_URL,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
@@ -34,11 +33,10 @@ app.use(
 
 connectDB();
 app.use("/api", apiRouter);
-app.get("/", (req, res) => {
-  res.send(
-    `<h1>Site is working. click <a href=${process.env.frontend}>
-            here</a> to visit frontend.`
-  );
+
+export const instance = new Razorpay({
+  key_id: process.env.RAZORPAY_API_KEY,
+  key_secret: process.env.RAZORPAY_API_SECRET,
 });
 
 // send back a 404 error for any unknown api request

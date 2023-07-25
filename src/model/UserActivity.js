@@ -26,6 +26,12 @@ const userActivitySchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    matchedUsers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     profileVisitor: [
       {
         type: mongoose.Schema.Types.ObjectId,
