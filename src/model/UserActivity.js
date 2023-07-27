@@ -41,6 +41,17 @@ const userActivitySchema = new mongoose.Schema(
     SubscriptionID: {
       type: String,
     },
+    SwapCount: {
+      type: Number,
+      default: 0,
+    },
+    MessageCount: {
+      type: Number,
+      default: 0,
+    },
+    onDate: {
+      type: Date,
+    }
   },
   { timestamps: true }
 );

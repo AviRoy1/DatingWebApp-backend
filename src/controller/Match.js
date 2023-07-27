@@ -142,20 +142,73 @@ export const matchlike = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     const otheruser = await User.findById(req.body.userid);
-
     let user1activity = await UserActivity.findOne({ userId: user._id });
     let user2activity = await UserActivity.findOne({ userId: otheruser._id });
 
     if (!user1activity) {
-      user1activity = await UserActivity.create({ userId: user._id });
+      user1activity = await UserActivity.create({
+        userId: user._id,
+        onDate: new Date(),
+      });
     }
     if (!user2activity) {
-      user2activity = await UserActivity.create({ userId: otheruser._id });
+      user2activity = await UserActivity.create({
+        userId: otheruser._id,
+        onDate: new Date(),
+      });
+    }
+
+    const profileDate1 = new Date(user1activity.onDate);
+    let year1 = profileDate1.getFullYear();
+    let month = profileDate1.getMonth() + 1;
+    let day = profileDate1.getDate();
+    const profileDate = `${year1}-${month.toString().padStart(2, "0")}-${day
+      .toString()
+      .padStart(2, "0")}`;
+
+    const currentDat1 = new Date();
+    year1 = currentDat1.getFullYear();
+    month = currentDat1.getMonth() + 1;
+    day = currentDat1.getDate();
+    const currentDate = `${year1}-${month.toString().padStart(2, "0")}-${day
+      .toString()
+      .padStart(2, "0")}`;
+
+    if (currentDate !== profileDate) {
+      user1activity.MessageCount = 1;
+      user1activity.SwapCount = 1;
+    } else {
+      if (user.subscription.plan === "0") {
+        if (user1activity.SwapCount === 5) {
+          return res.status(400).json({
+            message: "Your daily swap is over. Upgrade your plan for more swap",
+          });
+        } else {
+          user1activity.SwapCount = user1activity.SwapCount + 1;
+        }
+      } else if (user.subscription.plan === "1") {
+        if (user1activity.SwapCount === 50) {
+          return res.status(400).json({
+            message: "Your daily swap is over. Upgrade your plan for more swap",
+          });
+        } else {
+          user1activity.SwapCount += 1;
+        }
+      } else if (user.subscription.plan === "2") {
+        if (user1activity.SwapCount === 100) {
+          return res.status(400).json({
+            message: "Your daily swap is over. Upgrade your plan for more swap",
+          });
+        } else {
+          user1activity.SwapCount += 1;
+        }
+      } else if (user.subscription.plan === "3") {
+        user1activity.SwapCount += 1;
+      }
     }
 
     if (!user1activity.likedUsers.includes(otheruser._id)) {
       user1activity.likedUsers.push(otheruser._id);
-      await user1activity.save();
     }
     if (
       user1activity?.dislikedUsers.length > 0 &&
@@ -165,7 +218,6 @@ export const matchlike = async (req, res) => {
         (userid) => JSON.stringify(userid) !== JSON.stringify(otheruser._id)
       );
       user1activity.dislikedUsers = newDislikeArray;
-      await user1activity.save();
     }
 
     if (user2activity?.likedUsers.includes(user._id)) {
@@ -177,6 +229,8 @@ export const matchlike = async (req, res) => {
         .status(200)
         .json({ ismatch: true, user: user1activity, message: "It's a match" });
     } else {
+      await user1activity.save();
+      await user2activity.save();
       return res.status(200).json({
         ismatch: false,
         user: user1activity,
@@ -199,10 +253,65 @@ export const matchdislike = async (req, res) => {
     let user2activity = await UserActivity.findOne({ userId: otheruser._id });
 
     if (!user1activity) {
-      user1activity = await UserActivity.create({ userId: user._id });
+      user1activity = await UserActivity.create({
+        userId: user._id,
+        onDate: new Date(),
+      });
     }
     if (!user2activity) {
-      user2activity = await UserActivity.create({ userId: otheruser._id });
+      user2activity = await UserActivity.create({
+        userId: otheruser._id,
+        onDate: new Date(),
+      });
+    }
+    const profileDate1 = new Date(user1activity.onDate);
+    let year1 = profileDate1.getFullYear();
+    let month = profileDate1.getMonth() + 1;
+    let day = profileDate1.getDate();
+    const profileDate = `${year1}-${month.toString().padStart(2, "0")}-${day
+      .toString()
+      .padStart(2, "0")}`;
+
+    const currentDat1 = new Date();
+    year1 = currentDat1.getFullYear();
+    month = currentDat1.getMonth() + 1;
+    day = currentDat1.getDate();
+    const currentDate = `${year1}-${month.toString().padStart(2, "0")}-${day
+      .toString()
+      .padStart(2, "0")}`;
+
+    console.log(profileDate, currentDate);
+    if (currentDate !== profileDate) {
+      user1activity.MessageCount = 1;
+      user1activity.SwapCount = 1;
+    } else {
+      if (user.subscription.plan === "0") {
+        if (user1activity.SwapCount === 5) {
+          return res.status(400).json({
+            message: "Your daily swap is over. Upgrade your plan for more swap",
+          });
+        } else {
+          user1activity.SwapCount += 1;
+        }
+      } else if (user.subscription.plan === "1") {
+        if (user1activity.SwapCount === 50) {
+          return res.status(400).json({
+            message: "Your daily swap is over. Upgrade your plan for more swap",
+          });
+        } else {
+          user1activity.SwapCount += 1;
+        }
+      } else if (user.subscription.plan === "2") {
+        if (user1activity.SwapCount === 100) {
+          return res.status(400).json({
+            message: "Your daily swap is over. Upgrade your plan for more swap",
+          });
+        } else {
+          user1activity.SwapCount += 1;
+        }
+      } else if (user.subscription.plan === "3") {
+        user1activity.SwapCount += 1;
+      }
     }
 
     if (!user1activity.dislikedUsers.includes(otheruser._id)) {

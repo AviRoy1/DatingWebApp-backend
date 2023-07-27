@@ -26,6 +26,8 @@ export const register = async (req, res) => {
       createdAt: new Date(),
     });
 
+    user.subscription.plan = "0";
+    await user.save();
     //  Access Token
     const accessToken = jwt.sign(
       {
@@ -39,7 +41,7 @@ export const register = async (req, res) => {
     return res.status(200).json({
       user: other,
       accessToken: accessToken,
-      message: "Registered Successfully",
+      message: `Welcome back, ${user.name}`,
     });
   } catch (err) {
     // console.log(err);
@@ -141,6 +143,21 @@ export const myprofile = async (req, res) => {
   }
 };
 
+// add photos to My Profile
+export const addPhoto = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User Not Found" });
+    }
+    user.photos.push(req.body.photo);
+    await user.save();
+    return res.status(200).json({ user: user });
+  } catch (err) {
+    return res.status(400).json({ message: err.message });
+  }
+};
+
 //  Get all users for admin
 export const getalluserAdmin = async (req, res) => {
   try {
@@ -170,6 +187,23 @@ export const getalluser = async (req, res) => {
     result = await User.find({ interestIn: user.interestIn });
 
     return res.status(200).json({ users: alluser });
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({ message: err });
+  }
+};
+
+//  Get user's profile
+export const getUserProfile = async (req, res) => {
+  try {
+    const me = await User.findById(req.user.id);
+    let result;
+
+    const otheruser = await User.findById(req.params.id);
+
+    const [email, password, ...user] = otheruser;
+
+    return res.status(200).json({ user: user });
   } catch (err) {
     console.log(err);
     return res.status(400).json({ message: err });

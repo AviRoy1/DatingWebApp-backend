@@ -8,6 +8,7 @@ import {
   getalluserAdmin,
   getalluser,
   deleteuser,
+  addPhoto,
 } from "../../controller/User.js";
 import { getErrorMessage } from "../../utils/joi.util.js";
 import verifytoken from "../../middlewares/verifyToken.js";
@@ -81,6 +82,26 @@ router.post(
 
 // My profile
 router.get("/me", verifytoken, myprofile);
+
+// add phot to My profile
+const addPhotoSchema = joi.object().keys({
+  photo: joi.string(),
+});
+router.post(
+  "/addphoto",
+  verifytoken,
+  async (req, res, next) => {
+    try {
+      req.body = await addPhotoSchema.validateAsync(req.body);
+      next();
+    } catch (err) {
+      return res.status(422).json({ message: getErrorMessage(err) });
+    }
+  },
+  addPhoto
+);
+
+//  get user's profile by id;
 
 // get all users - admin
 router.get("/admin/alluser", verifytoken, getalluserAdmin);
