@@ -9,6 +9,7 @@ import connectDB from "./src/config/DB.js";
 import apiRouter from "./src/routes/index.js";
 import ApiError from "./src/utils/index.js";
 import Razorpay from "razorpay";
+import { Server } from "socket.io";
 
 dotenv.config();
 const app = express();
@@ -44,6 +45,47 @@ export const instance = new Razorpay({
 //   next(new ApiError(httpStatus.NOT_FOUND, "Not found"));
 // });
 
-app.listen(5000, () => {
+const server = app.listen(5000, () => {
   console.log(`Server is running on port- ${5000}`.bgWhite.red);
+});
+
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+  },
+});
+
+let activeUsers = [];
+
+io.on("connection", (socket) => {
+  socket.on("new-user-add", (newUserId) => {
+    if (!activeUsers.some((user) => user.userId === newUserId)) {
+      activeUsers.push({
+        userId: newUserId,
+        socketId: socket.id,
+      });
+    }
+    console.log("connected users", activeUsers);
+    io.emit("get-users", activeUsers);
+  });
+
+  socket.on("disconnect", () => {
+    activeUsers = activeUsers.filter((user) => user.socketId !== socket.id);
+
+    console.log("user Disconnected", activeUsers);
+    io.emit("get-users", activeUsers);
+  });
+
+  socket.on("send-message", (data) => {
+    const { receiverId } = data;
+    const user = activeUsers.find((user) => user.userId === receiverId);
+    console.log("Sending from socket to :", receiverId);
+    console.log(user);
+    console.log("Data: ", data);
+
+    if (user) {
+      io.to(user.socketId).emit("receive-message", data);
+      console.log("data sent");
+    }
+  });
 });

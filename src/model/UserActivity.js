@@ -51,7 +51,7 @@ const userActivitySchema = new mongoose.Schema(
     },
     onDate: {
       type: Date,
-    }
+    },
   },
   { timestamps: true }
 );
