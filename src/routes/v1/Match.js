@@ -6,6 +6,7 @@ import {
   matchlike,
   createMatch,
   matchdislike,
+  undolastswap,
 } from "../../controller/Match.js";
 
 const router = express.Router();
@@ -46,5 +47,7 @@ router.post(
   },
   matchdislike
 );
+
+router.post("/undoswap", verifytoken, undolastswap);
 
 export default router;
