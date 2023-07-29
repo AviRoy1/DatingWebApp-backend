@@ -30,7 +30,7 @@ export const userChats = async (req, res) => {
 };
 
 export const userDetails = async (req, res) => {
-  const id = req.params.userId;
+  const id = req.body.userId;
   try {
     const details = await User.findOne({ _id: id }, { name: 1, profilePic: 1 });
     res.status(200).json(details);
