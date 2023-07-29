@@ -1,6 +1,8 @@
 import User from "../model/User.js";
 import Match from "../model/Matchs.js";
 import UserActivity from "../model/UserActivity.js";
+import Notification from "../model/Notification.js";
+import Chat from "../model/Chat.js";
 
 async function matchingAlgo(userid) {
   const user = await User.findById(userid);
@@ -29,6 +31,13 @@ async function matchingAlgo(userid) {
     pipeline.unshift({
       $match: {
         _id: { $nin: useractivity.likedUsers },
+      },
+    });
+  }
+  if (useractivity && useractivity.dislikedUsers.length > 0) {
+    pipeline.unshift({
+      $match: {
+        _id: { $nin: useractivity.dislikedUsers },
       },
     });
   }
@@ -99,21 +108,14 @@ async function matchingAlgo(userid) {
 
   let pipeline2 = [];
   if (useractivity && useractivity.dislikedUsers.length > 0) {
-    console.log("okkk");
     pipeline2.unshift({
       $match: {
         _id: { $in: useractivity.dislikedUsers },
       },
     });
   }
-  // pipeline2.unshift({
-  //   $match: {
-  //     gender: lookingfor,
-  //   },
-  // });
 
   if (pipeline2.length > 0) {
-    console.log(pipeline2);
     const res3 = await User.aggregate(pipeline2);
     finalans = [...finalans, ...res3];
   }
@@ -207,9 +209,27 @@ export const matchlike = async (req, res) => {
       }
     }
 
+    let notification = await Notification.findOne({ userId: otheruser._id });
+    if (!notification) {
+      notification = await Notification.create({ userId: otheruser._id });
+    }
+
+    await notification.message.push({
+      text: `${user.name} has liked you`,
+      time: new Date(),
+      type: "like",
+    });
+    await notification.save();
     if (!user1activity.likedUsers.includes(otheruser._id)) {
       user1activity.likedUsers.push(otheruser._id);
     }
+
+    const lastswap = {
+      userId: otheruser._id,
+      action: "like",
+    };
+    user1activity.lastswap = lastswap;
+
     if (
       user1activity?.dislikedUsers.length > 0 &&
       user1activity?.dislikedUsers.includes(otheruser._id)
@@ -225,6 +245,27 @@ export const matchlike = async (req, res) => {
       user2activity.matchedUsers.push(user._id);
       await user1activity.save();
       await user2activity.save();
+      const user1messagecnt =
+        user.subscription.plan === "0"
+          ? 5
+          : user.subscription.plan === "1"
+          ? 50
+          : user.subscription.plan === "2"
+          ? "100"
+          : "10000";
+      const user2messagecnt =
+        otheruser.subscription.plan === "0"
+          ? 5
+          : otheruser.subscription.plan === "1"
+          ? 50
+          : otheruser.subscription.plan === "2"
+          ? "100"
+          : "10000";
+
+      const newchat = await Chat.create({
+        members: [user._id, otheruser._id],
+        TotalMessage: Math.max(user1messagecnt, user2messagecnt),
+      });
       return res
         .status(200)
         .json({ ismatch: true, user: user1activity, message: "It's a match" });
@@ -280,7 +321,11 @@ export const matchdislike = async (req, res) => {
       .toString()
       .padStart(2, "0")}`;
 
-    console.log(profileDate, currentDate);
+    const lastswap = {
+      userId: otheruser._id,
+      action: "dislike",
+    };
+    user1activity.lastswap = lastswap;
     if (currentDate !== profileDate) {
       user1activity.MessageCount = 1;
       user1activity.SwapCount = 1;
@@ -329,6 +374,36 @@ export const matchdislike = async (req, res) => {
     return res
       .status(201)
       .json({ message: "Succeessfully dislike", useractivity: user1activity });
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({ message: err });
+  }
+};
+
+export const undolastswap = async (req, res) => {
+  try {
+    const useractivity = await UserActivity.findOne({ userId: req.user.id });
+    const lastswapaction = req.body.lastswapaction;
+    const lastswap = req.body.lastswap;
+    if (lastswapaction === "like") {
+      const newlikearray = useractivity.likedUsers.filter(
+        (userid) => JSON.stringify(userid) !== JSON.stringify(lastswap)
+      );
+      useractivity.likedUsers = newlikearray;
+      if (useractivity.matchedUsers.includes(lastswap)) {
+        const newmatcharray = useractivity.matchedUsers.filter(
+          (userid) => JSON.stringify(userid) !== JSON.stringify(lastswap)
+        );
+        useractivity.matchedUsers = newmatcharray;
+      }
+    } else if (lastswapaction === "dislike") {
+      const newdislikearray = useractivity.dislikedUsers.filter(
+        (userid) => JSON.stringify(userid) !== JSON.stringify(lastswap)
+      );
+      useractivity.dislikedUsers = newdislikearray;
+    }
+    await useractivity.save();
+    return res.status(200).json({ message: "Undo your match" });
   } catch (err) {
     console.log(err);
     return res.status(400).json({ message: err });
