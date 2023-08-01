@@ -45,6 +45,17 @@ const userActivitySchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    lastswap: {
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+      action: {
+        type: String,
+        enum: ["like", "dislike", "none"],
+        default: "none",
+      },
+    },
     MessageCount: {
       type: Number,
       default: 0,

@@ -6,6 +6,7 @@ import {
   buySubscription,
   paymentVerification,
   getRazorpayKey,
+  getNotification,
 } from "../../controller/Subscription.js";
 
 const router = express.Router();
@@ -30,5 +31,7 @@ router.post(
 router.post("/paymentverification", verifytoken, paymentVerification);
 
 router.get("/razorpaykey", getRazorpayKey);
+
+router.post("/getnotification", getNotification);
 
 export default router;

@@ -8,6 +8,7 @@ import {
   getalluserAdmin,
   getalluser,
   deleteuser,
+  getUserProfile,
   addPhoto,
 } from "../../controller/User.js";
 import { getErrorMessage } from "../../utils/joi.util.js";
@@ -82,6 +83,7 @@ router.post(
 
 // My profile
 router.get("/me", verifytoken, myprofile);
+router.post("/getprofile", verifytoken, getUserProfile);
 
 // add phot to My profile
 const addPhotoSchema = joi.object().keys({

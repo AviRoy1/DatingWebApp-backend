@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import User from "../model/User.js";
 import { instance } from "../../server.js";
+import Notification from "../model/Notification.js";
 dotenv.config();
 
 export const buySubscription = async (req, res) => {
@@ -8,6 +9,12 @@ export const buySubscription = async (req, res) => {
     const user = await User.findById(req.user.id);
     if (user.isAdmin) {
       return res.status(400).json({ message: "Admin can't buy subscription" });
+    }
+
+    if (req.body.plan <= user.subscription.plan) {
+      return res
+        .status(400)
+        .json({ message: "You already have higher subscription plan" });
     }
 
     let plan_id;
@@ -24,6 +31,16 @@ export const buySubscription = async (req, res) => {
       user.subscription.plan = req.body.plan;
     }
 
+    let notification = await Notification.findOne({ userId: user._id });
+    if (!notification) {
+      notification = await Notification.create({ userId: user._id });
+    }
+    await notification.message.push({
+      text: `Your subscription plan has been activated`,
+      time: new Date(),
+      type: "subscription",
+    });
+    await notification.save();
     const subscription = await instance.subscriptions.create({
       plan_id,
       customer_notify: 1,
@@ -91,4 +108,20 @@ export const getRazorpayKey = async (req, res) => {
     success: true,
     key: process.env.RAZORPAY_API_KEY,
   });
+};
+
+export const getNotification = async (req, res) => {
+  try {
+    let notification = await Notification.findOne({ userId: req.body.id });
+    if (!notification) {
+      notification = await Notification.create({ userId: req.body.id });
+    }
+    const notifications = notification.message;
+    return res
+      .status(200)
+      .json({ notifications: notifications, count: notifications.length });
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({ message: err });
+  }
 };

@@ -151,6 +151,9 @@ export const addPhoto = async (req, res) => {
       return res.status(404).json({ message: "User Not Found" });
     }
     user.photos.push(req.body.photo);
+    if (user.photos.length > 5) {
+      user.photos.shift();
+    }
     await user.save();
     return res.status(200).json({ user: user });
   } catch (err) {
@@ -199,11 +202,9 @@ export const getUserProfile = async (req, res) => {
     const me = await User.findById(req.user.id);
     let result;
 
-    const otheruser = await User.findById(req.params.id);
+    const otheruser = await User.findById(req.body.id);
 
-    const [email, password, ...user] = otheruser;
-
-    return res.status(200).json({ user: user });
+    return res.status(200).json({ user: otheruser });
   } catch (err) {
     console.log(err);
     return res.status(400).json({ message: err });
