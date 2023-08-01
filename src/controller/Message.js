@@ -9,8 +9,18 @@ export const addMessage = async (req, res) => {
     text,
   });
   try {
+    const newChat = await ChatModel.findById(chatId);
     const result = await message.save();
-    res.status(200).json(result);
+
+    if (!newChat) {
+      throw new Error("Chat not found");
+    }
+
+    newChat.messageCount += 1;
+    await newChat.save();
+    //console.log(chat);
+
+    res.status(200).json({ result, newChat });
   } catch (error) {
     res.status(500).json(error);
   }

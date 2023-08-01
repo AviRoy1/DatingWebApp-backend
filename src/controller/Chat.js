@@ -4,8 +4,21 @@ import User from "../model/User.js";
 import UserActivity from "../model/UserActivity.js";
 
 export const createChat = async (req, res) => {
+  let count = 0;
+  let plan = req.body.plan;
+  if (plan === "0") {
+    count = 10;
+  } else if (plan === "1") {
+    count = 50;
+  } else if (plan === "2") {
+    count = 200;
+  } else if (plan === "3") {
+    count = 100000;
+  }
+
   const newChat = new ChatModel({
     members: [req.body.senderId, req.body.receiverId],
+    totalMessage: count,
   });
   try {
     const result = await newChat.save();
